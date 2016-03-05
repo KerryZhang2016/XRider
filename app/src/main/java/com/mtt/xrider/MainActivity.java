@@ -14,11 +14,16 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.LinearLayout;
 
 import com.mtt.xrider.adapter.XRiderAdapter;
 import com.mtt.xrider.listener.HidingScrollListener;
+
+import io.codetail.animation.SupportAnimator;
+import io.codetail.animation.ViewAnimationUtils;
 
 public class MainActivity extends XRiderBaseActivity implements View.OnClickListener,
         NavigationView.OnNavigationItemSelectedListener,SwipeRefreshLayout.OnRefreshListener{
@@ -31,6 +36,11 @@ public class MainActivity extends XRiderBaseActivity implements View.OnClickList
     private FloatingActionButton floatingActionButton;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
+    private LinearLayout ll_reveal;
+    private SupportAnimator mAnimator;
+    private boolean isPressed = false;
+    private boolean isHidden = true;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +92,10 @@ public class MainActivity extends XRiderBaseActivity implements View.OnClickList
         });
         XRiderAdapter mAdapter = new XRiderAdapter(MainActivity.this, null,null);
         recyclerView.setAdapter(mAdapter);
+
+        ll_reveal = (LinearLayout) findViewById(R.id.ll_reveal_layout);
+        ll_reveal.setOnClickListener(this);
+        ll_reveal.setVisibility(View.INVISIBLE);
     }
 
     /**
@@ -118,6 +132,58 @@ public class MainActivity extends XRiderBaseActivity implements View.OnClickList
 
     @Override
     public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.main_fab:
+                if(!isPressed){
+                    isPressed = true;
 
+                    int width = ll_reveal.getWidth();
+                    int height = ll_reveal.getHeight();
+                    float finalRadius = (float) Math.hypot(width, height);
+
+                    int fx = (floatingActionButton.getLeft() + floatingActionButton.getRight())/2;
+                    int fy = (floatingActionButton.getTop() + floatingActionButton.getBottom())/2;
+
+                    mAnimator =
+                            ViewAnimationUtils.createCircularReveal(ll_reveal, fx, fy, 0, finalRadius);
+                    mAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+                    mAnimator.setDuration(500);
+                    if (isHidden) {
+                        ll_reveal.setVisibility(View.VISIBLE);
+                        mAnimator.start();
+                        isHidden = false;
+                    }
+                } else {
+                    if (mAnimator != null && !mAnimator.isRunning()) {
+                        mAnimator = mAnimator.reverse();
+                        mAnimator.addListener(new SupportAnimator.AnimatorListener() {
+                            @Override
+                            public void onAnimationStart() {
+
+                            }
+
+                            @Override
+                            public void onAnimationEnd() {
+                                ll_reveal.setVisibility(View.INVISIBLE);
+                                isHidden = true;
+                                isPressed = false;
+                            }
+
+                            @Override
+                            public void onAnimationCancel() {
+
+                            }
+
+                            @Override
+                            public void onAnimationRepeat() {
+
+                            }
+
+                        });
+                        mAnimator.start();
+                    }
+                }
+                break;
+        }
     }
 }

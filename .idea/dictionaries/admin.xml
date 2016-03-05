@@ -2,6 +2,7 @@
   <dictionary name="admin">
     <words>
       <w>coord</w>
+      <w>endradius</w>
       <w>recyclerview</w>
       <w>simpleridingdata</w>
       <w>weekdata</w>
