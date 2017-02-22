@@ -1,5 +1,4 @@
 # XRider
-a sexy riding app(Powered by MTT developers/OpenSource)
 
 ## 主要功能：
 1. 用户登录、注册
